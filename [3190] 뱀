@@ -1,0 +1,131 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.LinkedList;
+import java.util.Deque;
+import java.util.StringTokenizer;
+
+public class Main {
+
+	public static void main (String[] args) throws IOException {
+
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		StringTokenizer st = new StringTokenizer(br.readLine());
+		
+		int size = Integer.parseInt(st.nextToken());
+		int[][] field = new int[size][size];
+		int col = 0, row = 0; // 시작좌표
+		Deque<Integer> snakeCol = new LinkedList<>();
+		Deque<Integer> snakeRow = new LinkedList<>();
+		snakeCol.add(col);
+		snakeRow.add(row);
+		
+		int appleNum = Integer.parseInt(br.readLine());
+		for(int i=1; i<=appleNum; i++) { // 사과  = 2
+			st = new StringTokenizer(br.readLine());
+			field[Integer.parseInt(st.nextToken())-1][Integer.parseInt(st.nextToken())-1] = 2;
+		}
+
+		int dirNum = Integer.parseInt(br.readLine());
+		int dirStartNum = 0;
+		int[] dirSecond = new int[dirNum];
+		char[] dirTrans = new char[dirNum]; // char
+		int[] deltaCol = {0,1,0,-1}; // 우 하 좌 상
+		int[] deltaRow = {1,0,-1,0};
+		int deltaNum = 0; // default 우
+		int second = 0;
+
+		for(int i=0; i<dirNum; i++) {
+			st = new StringTokenizer(br.readLine());
+			dirSecond[i] = Integer.parseInt(st.nextToken())+1; // second이후 방향전환이므로 +1
+			dirTrans[i] = st.nextToken().charAt(0);
+		}
+
+		while(true) {
+			second++;
+			
+			for(int i=dirStartNum; i<dirNum; i++) { // 방향설정, 시간이 오름차순으로 주어진다는 말이 없어서 탐색
+				if(dirSecond[i] == second) {
+				dirStartNum++;
+					if(dirTrans[i] == 'D') deltaNum++;
+					else if(dirTrans[i] == 'L') deltaNum--; // 가독성을 위해 조건 표시
+					}
+					if(deltaNum == -1)
+						deltaNum = 3;
+					deltaNum %= 4;
+					}
+			
+			int transCol = snakeCol.peek()+deltaCol[deltaNum]; // 머리좌표+델타좌표
+			int transRow = snakeRow.peek()+deltaRow[deltaNum];
+			
+			if((transCol >= 0 && transCol < size) && (transRow >= 0 && transRow < size)) // 머리를 늘릴 수 있으면
+			{
+				if(field[transCol][transRow] == 1) break; // 몸통이면 break
+				if(field[transCol][transRow] != 2) // 사과가 아니면 꼬리부분 0 표시 후 꼬리 제거
+					field[snakeCol.pollLast()][snakeRow.pollLast()] = 0;
+				
+				field[transCol][transRow] = 1;
+
+				snakeCol.addFirst(transCol); // 좌표 add
+				snakeRow.addFirst(transRow);
+
+			}
+			else break; // 머리를 늘릴 수 없으면 break
+		}
+			System.out.println(second);
+	}
+}
+
+
+/*
+
+### Deque에서,
+
+## remove()와 poll()의 차이?
+
+remove()
+
+This method differs from `poll`
+ only in that it throws an exception if this deque is empty.
+
+poll()
+
+the first element of this deque, or `null` if this deque is empty
+
+둘다 반환값이 있다는 것은 동일합니다.
+
+각각 Deque가 empty일시, 예외/null을 반환한다는 차이가 있습니다.
+
+removeFirst() ↔ pollFirst()
+
+removeLast() ↔ pollLast()
+
+도 동일한 차이입니다.
+
+## FIFO에서 remove()와 removeFirst()의 차이?
+
+poll()
+
+the first element of this deque
+
+pollFirst()/pollLast()
+
+the first/tail element of this deque
+
+remove()
+
+the head of the queue represented by this deque
+
+removeFirst()/removeLast()
+
+the head/tail of the queue represented by this deque
+
+표현상의 차이가 있을 뿐,
+
+remove() ↔ removeFirst()
+
+poll()↔pollFirst()
+
+는 동일합니다.
+
+*/
